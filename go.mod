@@ -1,4 +1,4 @@
-module github.com/arthurspedine/orders-api.git
+module github.com/arthurspedine/orders-api
 
 go 1.20
 
