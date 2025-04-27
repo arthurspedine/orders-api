@@ -17,9 +17,10 @@ type App struct {
 
 func New() *App {
 	app := &App {
-		router: loadRoutes(),
 		rdb: redis.NewClient(&redis.Options{}),
 	}
+
+	app.loadRoutes()
 
 	return app
 }
@@ -63,6 +64,4 @@ func (a *App) Start(ctx context.Context) error {
 
 		return server.Shutdown(timeout)
 	}
-
-	return nil
 }

@@ -71,22 +71,21 @@ func (r *RedisRepo) DeleteById(ctx context.Context, id uint64) error {
 
 	txn := r.Client.TxPipeline()
 
-	err := txn.Del(ctx, key).Err()
-	if errors.Is(err, redis.Nil) {
-		txn.Discard()
-		return err
-	} else if err != nil {
-		txn.Discard()
-		return fmt.Errorf("get order: %w", err)
-	}
+	delResult := txn.Del(ctx, key)
 
 	if err := txn.SRem(ctx, "orders", key).Err(); err != nil {
 		txn.Discard()
-		return fmt.Errorf("failed to remvoe from orders set: %w", err)
+		return fmt.Errorf("failed to remove from orders set: %w", err)
 	}
 
-	if _, err := txn.Exec(ctx); err != nil {
+	_, err := txn.Exec(ctx)
+	if err != nil {
 		return fmt.Errorf("failed to exec: %w", err)
+	}
+
+	deleted := delResult.Val()
+	if deleted == 0 {
+		return ErrNotExist
 	}
 
 	return nil
